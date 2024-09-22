@@ -1,5 +1,7 @@
+#define RAYGUI_IMPLEMENTATION
 #include <iostream>
 #include "raylib.h"
+#include "raygui.h"
 
 int main(void)
 {
@@ -51,7 +53,7 @@ int main(void)
         }
     };
     Ball ball; ball.reset();
-    
+    int state = 0;
     
 
     // std::cout<<"select 1player or 2player"<<std::endl;
@@ -59,49 +61,61 @@ int main(void)
 
     while (!WindowShouldClose())
     {
-        // if (p==1)
-        // {
-            if (left_paddle.y >= 0){
-                if(IsKeyDown(KEY_W) || IsKeyDown(KEY_UP)) {left_paddle.y -= left_paddle.speed;}
+        if(state == 0){
+            if(GuiButton({350,150,100,50},"Player 1")) {state = 1;}
+            if(GuiButton({350,250,100,50},"Player 2")) {state = 2;}
+        }
+        else{
+            if (state == 1)
+            {
+                if (left_paddle.y >= 0){
+                    if(IsKeyDown(KEY_W) || IsKeyDown(KEY_UP)) {left_paddle.y -= left_paddle.speed;}
+                }
+                if (left_paddle.y+left_paddle.height <= screenHeight){
+                    if(IsKeyDown(KEY_S) || IsKeyDown(KEY_DOWN)) {left_paddle.y += left_paddle.speed;}
+                }
+                if (right_paddle.y >= 0){
+                    if(ball.y < right_paddle.y) {right_paddle.y -= right_paddle.speed;}
+                }
+                if ((right_paddle.y+right_paddle.height) <= screenHeight){
+                    if(ball.y > (right_paddle.y + right_paddle.height)) {right_paddle.y += right_paddle.speed;}
+                }
             }
-            if (left_paddle.y+left_paddle.height <= screenHeight){
-                if(IsKeyDown(KEY_S) || IsKeyDown(KEY_DOWN)) {left_paddle.y += left_paddle.speed;}
+            if (state == 2)
+            {
+                if (left_paddle.y >= 0){
+                    if(IsKeyDown(KEY_W)) {left_paddle.y -= left_paddle.speed;}
+                }
+                if ((left_paddle.y+left_paddle.height) <= screenHeight){
+                    if(IsKeyDown(KEY_S)) {left_paddle.y += left_paddle.speed;}
+                }
+                if (right_paddle.y >= 0){
+                    if(IsKeyDown(KEY_UP)) {right_paddle.y -= right_paddle.speed;}
+                }
+                if ((right_paddle.y+right_paddle.height) <= screenHeight){
+                    if(IsKeyDown(KEY_DOWN)) {right_paddle.y += right_paddle.speed;}
+                }
             }
-            if (right_paddle.y >= 0){
-                if(ball.y < right_paddle.y) {right_paddle.y -= right_paddle.speed;}
-            }
-            if ((right_paddle.y+right_paddle.height) <= screenHeight){
-                if(ball.y > (right_paddle.y + right_paddle.height)) {right_paddle.y += right_paddle.speed;}
-            }
-        // }
-        // if (p==2)
-        // {
-        //     if (left_paddle.y >= 0){
-        //         if(IsKeyDown(KEY_W)) {left_paddle.y -= left_paddle.speed;}
-        //     }
-        //     if ((left_paddle.y+left_paddle.height) <= screenHeight){
-        //         if(IsKeyDown(KEY_S)) {left_paddle.y += left_paddle.speed;}
-        //     }
-        //     if (right_paddle.y >= 0){
-        //         if(IsKeyDown(KEY_UP)) {right_paddle.y -= right_paddle.speed;}
-        //     }
-        //     if ((right_paddle.y+right_paddle.height) <= screenHeight){
-        //         if(IsKeyDown(KEY_DOWN)) {right_paddle.y += right_paddle.speed;}
-        //     }
-        // }
-        ball.update();
+            ball.update();
 
-        if (CheckCollisionCircleRec(Vector2{ball.x,ball.y}, ball.radius, left_paddle.get_rect()))
-        {
-            if (ball.x > (left_paddle.x+left_paddle.width)) {ball.speedX *= -1;}
-            else{ball.speedY *= -1;}
+            if (CheckCollisionCircleRec(Vector2{ball.x,ball.y}, ball.radius, left_paddle.get_rect()))
+            {
+                if (ball.x > (left_paddle.x+left_paddle.width)) {ball.speedX *= -1;}
+                else{ball.speedY *= -1;}
+            }
+            if (CheckCollisionCircleRec(Vector2{ball.x,ball.y}, ball.radius, right_paddle.get_rect()))
+            {
+                if (ball.x < right_paddle.x) {ball.speedX *= -1;}
+                else{ball.speedY *= -1;}
+            }
+
+            if (ball.x > screenWidth || ball.x < 0)
+            {
+                ball.reset();
+            }
+            
         }
-        if (CheckCollisionCircleRec(Vector2{ball.x,ball.y}, ball.radius, right_paddle.get_rect()))
-        {
-            if (ball.x < right_paddle.x) {ball.speedX *= -1;}
-            else{ball.speedY *= -1;}
-        }
-        
+
         BeginDrawing();
 
             ClearBackground(RAYWHITE);
