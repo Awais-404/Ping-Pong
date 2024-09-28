@@ -1,6 +1,9 @@
 {
     "files.associations": {
         "string_view": "cpp",
-        "string": "cpp"
+        "string": "cpp",
+        "memory": "cpp",
+        "optional": "cpp",
+        "iostream": "cpp"
     }
 }

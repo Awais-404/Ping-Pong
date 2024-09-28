@@ -1,73 +1,7 @@
-#define RAYGUI_IMPLEMENTATION
-#include <iostream>
-#include "raylib.h"
-#include "raygui.h"
-
-
-const int screenWidth = 800;
-const int screenHeight = 450;
+#include "main.hpp"
 
 int score_P1;
 int score_P2;
-int collisions;
-
-class Paddle{
-public:
-    float width = 10;
-    float height = 100;
-    float x;
-    float y = (screenHeight/2) - (height/2);
-    Color color = BLACK;
-    float speed = 4;
-public:
-    void draw(){DrawRectangle(x, y, width, height, color);};
-    Rectangle get_rect(){return Rectangle{x, y, width, height};}
-};
-
-class Ball{
-public:
-    float x = screenWidth/2;
-    float y = screenHeight/2;
-    float radius = 10;
-    Color color = BLACK;
-    float speedX;
-    float speedY;
-public:
-    void draw(){DrawCircle(x, y, radius, color);}
-    void reset(){
-        x = screenWidth/2;
-        y = screenHeight/2;
-        speedX = GetRandomValue(2,5);
-        speedY = GetRandomValue(1,4);
-        if(GetRandomValue(-1,1) < 0) {speedX *= -1;}
-        if(GetRandomValue(-1,1) < 0) {speedY *= -1;}
-    }
-    void update(){
-        x += speedX;
-        y += speedY;
-        if ((y-radius) <= 0) {speedY *= -1;}
-        if ((y+radius) >= screenHeight) {speedY *= -1;}
-        if (collisions >= 5)
-        {
-            if (speedX > 0)
-            {
-                speedX += 1;
-            }else{
-                speedX -= 1;
-            }
-
-            if (speedY > 0)
-            {
-                speedY += 1;
-            }else{
-                speedY -= 1;
-            }
-            
-            collisions = 0;
-        }
-        
-    }
-};
 
 enum State{
     Main_Menu = 0,
@@ -79,25 +13,36 @@ int main(void)
 {
     Paddle left_paddle; left_paddle.x = 10;
     Paddle right_paddle; right_paddle.x = (screenWidth-10-right_paddle.width);    
-    Ball ball; ball.reset();
+    Ball ball; 
+    ball.reset();
 
     InitWindow(screenWidth, screenHeight, "Ping Pong");
     SetTargetFPS(60);
+    set_gui();
 
     state = Main_Menu;
     
-    GuiSetStyle(BUTTON, BORDER_WIDTH, 3);
-    GuiSetStyle(DEFAULT, TEXT_SIZE, 20);
+    unsigned char a = 240;
+    int b = 2;
+    int c = 15;
+    bool reset = false;
+
     while (!WindowShouldClose())
     {
         if(state == Main_Menu){
-            // GuiLabel({350,30,100,50},"Pong");
             DrawText("Pong", 350,30, 40, BLACK);
-            if(GuiButton({350,150,100,50},"1 Player")) {state = Player_1;}
-            if(GuiButton({350,250,100,50},"2 Player")) {state = Player_2;}
             score_P1 = 0;
             score_P2 = 0;
-            collisions = 0;
+            ball.collisions = 0;
+            if(a<25 || a>243){
+                b *= -1;
+            }
+            a += b;
+            DrawRectangleGradientH(0,0,40,screenHeight,Color{a,a,a,255},RAYWHITE);
+            DrawRectangleGradientH(screenWidth-40,0,40,screenHeight,RAYWHITE,Color{a,a,a,255});
+
+            if(GuiButton({350,150,100,50},"1 Player")) {state = Player_1; a = 245;}
+            if(GuiButton({350,250,100,50},"2 Player")) {state = Player_2; a = 245;}
         }
         else{
             if (state == Player_1)
@@ -134,28 +79,92 @@ int main(void)
 
             if (CheckCollisionCircleRec(Vector2{ball.x,ball.y}, ball.radius, left_paddle.get_rect()))
             {
-                if (ball.x > (left_paddle.x+left_paddle.width)) {ball.speedX *= -1;}
+                if (ball.x > (left_paddle.x+left_paddle.width))
+                {
+                    ball.x = left_paddle.x+left_paddle.width+ball.radius;
+                    ball.speedX *= -1;
+                }
                 else{ball.speedY *= -1;}
-                collisions++;
+                ball.collisions++;
             }
             if (CheckCollisionCircleRec(Vector2{ball.x,ball.y}, ball.radius, right_paddle.get_rect()))
             {
-                if (ball.x < right_paddle.x) {ball.speedX *= -1;}
+                if (ball.x < right_paddle.x)
+                {
+                    ball.x = right_paddle.x-ball.radius;
+                    ball.speedX *= -1;
+                }
                 else{ball.speedY *= -1;}
-                collisions++;
+                ball.collisions++;
             }
 
             if (ball.x < 0)
             {
-                score_P2++;
-                ball.reset();
+                if (!reset){
+                    if (a>240)
+                    {
+                        a = 240;
+                        c =10;
+                        score_P2++;
+                    }
+                    if (a<25)
+                    {
+                        c *= -1;
+                    }
+                    a -= c;
+                    if(a>240){
+                        a = 245;
+                        reset = true;
+                    }
+                    DrawRectangleGradientH(0,0,25,screenHeight,Color{a,a,a,255},RAYWHITE);
+                }
+                if (reset)
+                {
+                    if (ball.r > ball.radius)
+                    {
+                        DrawCircleGradient(screenWidth/2, screenHeight/2, ball.r, ball.color, RAYWHITE);
+                        DrawCircle(screenWidth/2, screenHeight/2, ball.radius, ball.color);
+                        ball.r -= 1.5;
+                    }else{
+                        ball.reset();
+                        reset = false;
+                    }
+                }
             }
             if (ball.x > screenWidth)
             {
-                score_P1++;
-                ball.reset();
+                if (!reset)
+                {
+                    if (a>240)
+                    {
+                        a = 240;
+                        c =10;
+                        score_P1++;
+                    }
+                    if (a<25)
+                    {
+                        c *= -1;
+                    }
+                    a -= c;
+                    if(a>240){
+                        a = 245;
+                        reset = true;
+                    } 
+                    DrawRectangleGradientH(screenWidth-25,0,25,screenHeight,RAYWHITE,Color{a,a,a,255});
+                }
+                if (reset)
+                {
+                    if (ball.r > ball.radius)
+                    {
+                        DrawCircleGradient(screenWidth/2, screenHeight/2, ball.r, ball.color, RAYWHITE);
+                        DrawCircle(screenWidth/2, screenHeight/2, ball.radius, ball.color);
+                        ball.r -= 1.5;
+                    }else{
+                        ball.reset();
+                        reset = false;
+                        }
+                }
             }
-
             DrawText("P1 score: ",25,5,20,RED);
             DrawText((std::to_string(score_P1)).c_str(),120,5,20,RED);
             DrawText("P2 score: ",650,5,20,RED);
