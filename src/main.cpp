@@ -21,7 +21,7 @@ int main(void)
     bool sound = true;
     bool sfx = true;
 
-    InitWindow(screenWidth, screenHeight, "Ping Pong");
+    InitWindow(screenWidth, screenHeight, "Pong");
     SetTargetFPS(60);
     InitAudioDevice();
     Music music = LoadMusicStream("bg-music.mp3");
@@ -47,7 +47,7 @@ int main(void)
     {
         if (sound) {UpdateMusicStream(music);}
         if(state == Main_Menu){
-            DrawText("Pong", 350,30, 40, BLACK);
+            DrawText("Pong", 340,40, 50, BLACK);
             score_P1 = 0;
             score_P2 = 0;
             Pause = false;
