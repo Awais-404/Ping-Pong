@@ -18,6 +18,8 @@ int main(void)
     bool moved1 = false;
     bool moved2 = false;
     bool Pause;
+    bool sound = true;
+    bool sfx = true;
 
     InitWindow(screenWidth, screenHeight, "Ping Pong");
     SetTargetFPS(60);
@@ -43,7 +45,7 @@ int main(void)
 
     while (!WindowShouldClose())
     {
-        UpdateMusicStream(music);
+        if (sound) {UpdateMusicStream(music);}
         if(state == Main_Menu){
             DrawText("Pong", 350,30, 40, BLACK);
             score_P1 = 0;
@@ -62,11 +64,32 @@ int main(void)
 
             if(GuiButton({350,150,100,50},"1 Player")) {state = Player_1; a = 245;}
             if(GuiButton({350,250,100,50},"2 Player")) {state = Player_2; a = 245;}
+            DrawCircle(366,345,22,DARKGRAY);
+            DrawCircle(366,345,20,LIGHTGRAY);
+            GuiDrawIcon(122,351,329,2,DARKGRAY);
+            DrawCircle(435,345,22,DARKGRAY);
+            DrawCircle(435,345,20,LIGHTGRAY);
+            GuiDrawIcon(123,420,329,2,DARKGRAY);
+            if (!sound) {DrawLineEx(Vector2{351,330},Vector2{381,360},2,DARKGRAY);}
+            if (!sfx) {DrawLineEx(Vector2{420,330},Vector2{450,360},2,DARKGRAY);}
+            
+            if (IsMouseButtonPressed(0))
+            {
+                Vector2 mousepos = GetMousePosition();
+                if (CheckCollisionPointCircle(mousepos,Vector2{366,345},20))
+                {
+                    sound = !sound;
+                }
+                if (CheckCollisionPointCircle(mousepos,Vector2{435,345},20))
+                {
+                    sfx = !sfx;
+                }
+            }
         }
         else{
+            if (IsKeyPressed(KEY_ESCAPE)) {Pause = !Pause;}
             if (!Pause)
             {
-                if (IsKeyPressed(KEY_ESCAPE)) {Pause = true;}
                 
                 if (state == Player_1)
                 {
@@ -122,7 +145,7 @@ int main(void)
                         ball.speedX *= -1;
                     }
                     else{ball.speedY *= -1;}
-                    PlaySound(hit);
+                    if(sfx) {PlaySound(hit);}
                     ball.collisions++;
                 }
                 if (CheckCollisionCircleRec(Vector2{ball.x,ball.y}, ball.radius, right_paddle.get_rect()))
@@ -133,7 +156,7 @@ int main(void)
                         ball.speedX *= -1;
                     }
                     else{ball.speedY *= -1;}
-                    PlaySound(hit);
+                    if(sfx) {PlaySound(hit);}
                     ball.collisions++;
                 }
 
@@ -145,7 +168,7 @@ int main(void)
                             a = 240;
                             c =10;
                             score_P2++;
-                            PlaySound(score);
+                            if(sfx) {PlaySound(score);}
                         }
                         if (a<25)
                         {
@@ -160,7 +183,7 @@ int main(void)
                     }
                     if (reset)
                     {
-                            PlaySound(respawn);
+                            if(sfx) {PlaySound(respawn);}
                         if (ball.r > ball.radius)
                         {
                             DrawCircleGradient(screenWidth/2, screenHeight/2, ball.r, ball.color, RAYWHITE);
@@ -181,7 +204,7 @@ int main(void)
                             a = 240;
                             c =10;
                             score_P1++;
-                            PlaySound(score);
+                            if(sfx) {PlaySound(score);}
                         }
                         if (a<25)
                         {
@@ -196,7 +219,7 @@ int main(void)
                     }
                     if (reset)
                     {
-                            PlaySound(respawn);
+                            if(sfx) {PlaySound(respawn);}
                         if (ball.r > ball.radius)
                         {
                             DrawCircleGradient(screenWidth/2, screenHeight/2, ball.r, ball.color, RAYWHITE);
@@ -229,8 +252,28 @@ int main(void)
             if (Pause)
             {
                 DrawRectangle(0,0,screenWidth,screenHeight, Color{255,255,255,150});
-                if(GuiButton({350,100,100,40},"Main menu")) {state = Main_Menu;}
-                if(GuiButton({350,150,100,40},"Continue")) {Pause = false;}
+                if(GuiButton({350,100,100,40},"Main menu")) {state = Main_Menu; a = 240;}
+                if(GuiButton({350,165,100,40},"Continue")) {Pause = false;}
+                DrawCircle(366,250,22,DARKGRAY);
+                DrawCircle(366,250,20,LIGHTGRAY);
+                GuiDrawIcon(122,351,234,2,DARKGRAY);
+                DrawCircle(435,250,22,DARKGRAY);
+                DrawCircle(435,250,20,LIGHTGRAY);
+                GuiDrawIcon(123,420,234,2,DARKGRAY);
+                if (!sound) {DrawLineEx(Vector2{351,235},Vector2{381,265},2,DARKGRAY);}
+                if (!sfx) {DrawLineEx(Vector2{420,235},Vector2{450,265},2,DARKGRAY);}
+                if (IsMouseButtonPressed(0))
+                {
+                    Vector2 mousepos = GetMousePosition();
+                    if (CheckCollisionPointCircle(mousepos,Vector2{366,250},20))
+                    {
+                        sound = !sound;
+                    }
+                    if (CheckCollisionPointCircle(mousepos,Vector2{435,250},20))
+                    {
+                        sfx = !sfx;
+                    }
+                }
             }
 
         EndDrawing();
